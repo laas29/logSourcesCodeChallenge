@@ -1,6 +1,6 @@
 "use strict";
 
-module.exports = class HeapPriorityQuue {
+module.exports = class HeapPriorityQueue {
 
     constructor(maxElements) {
         this.heap = Array(maxElements).fill(0);
