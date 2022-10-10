@@ -19,7 +19,7 @@ const logMerge = (logSources, printer) => {
     while (prioritizedLogSource = priorityQueue.extractMin()) {
         printer.print(prioritizedLogSource.logSource.last);
         if (prioritizedLogSource.logSource.pop()) {
-            insertLogSourceHeadReferenceIntoPriorityQueue(prioritizedLogSource.logSource, prioritizedLogSource.logSourcesIdx);
+            insertLogSourceHeadReferenceIntoPriorityQueue(prioritizedLogSource.logSource);
         }
     }
 }
@@ -30,7 +30,7 @@ const asyncLogMerge = async (logSources, printer, resolve) => {
     while (prioritizedLogSource = priorityQueue.extractMin()) {
         printer.print(prioritizedLogSource.logSource.last);
         if (await prioritizedLogSource.logSource.popAsync()) {
-            insertLogSourceHeadReferenceIntoPriorityQueue(prioritizedLogSource.logSource, prioritizedLogSource.logSourcesIdx);
+            insertLogSourceHeadReferenceIntoPriorityQueue(prioritizedLogSource.logSource);
         }
     }
     resolve();
