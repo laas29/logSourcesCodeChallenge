@@ -2,36 +2,35 @@
 const HeapPriorityQueue = require('./heap-priority-queue');
 
 let priorityQueue;
-const createIndexedLogSource = (logSource, logSourcesIdx, priority) => ({ logSourcesIdx, logSource, priority });
-const insertLogSourceHeadReferenceIntoPriorityQueue = (logSource, logSourcesIdx) =>
-    priorityQueue.insert(createIndexedLogSource(logSource, logSourcesIdx, logSource.last.date.getTime()));
+
+const insertLogSourceHeadReferenceIntoPriorityQueue = (logSource) =>
+    priorityQueue.insert({ logSource, priority: logSource.last.date.getTime() });
+
 const sortLogSourcesQueuesHeads = (logSources) => {
     priorityQueue = new HeapPriorityQueue(logSources.length);
-    logSources.forEach((logSource, logSourcesIdx) => {
-        insertLogSourceHeadReferenceIntoPriorityQueue(logSource, logSourcesIdx);
+    logSources.forEach((logSource) => {
+        insertLogSourceHeadReferenceIntoPriorityQueue(logSource);
     });
 };
 
 const logMerge = (logSources, printer) => {
     sortLogSourcesQueuesHeads(logSources);
-    let indexedLogSource;
-    while (indexedLogSource = priorityQueue.extractMin()) {
-        printer.print(indexedLogSource.logSource.last);
-        const currentLogSource = logSources[indexedLogSource.logSourcesIdx];
-        if (currentLogSource.pop()) {
-            insertLogSourceHeadReferenceIntoPriorityQueue(currentLogSource, indexedLogSource.logSourcesIdx);
+    let prioritizedLogSource;
+    while (prioritizedLogSource = priorityQueue.extractMin()) {
+        printer.print(prioritizedLogSource.logSource.last);
+        if (prioritizedLogSource.logSource.pop()) {
+            insertLogSourceHeadReferenceIntoPriorityQueue(prioritizedLogSource.logSource, prioritizedLogSource.logSourcesIdx);
         }
     }
 }
 
 const asyncLogMerge = async (logSources, printer, resolve) => {
     sortLogSourcesQueuesHeads(logSources);
-    let indexedLogSource;
-    while (indexedLogSource = priorityQueue.extractMin()) {
-        printer.print(indexedLogSource.logSource.last);
-        const currentLogSource = logSources[indexedLogSource.logSourcesIdx];
-        if (await currentLogSource.popAsync()) {
-            insertLogSourceHeadReferenceIntoPriorityQueue(currentLogSource, indexedLogSource.logSourcesIdx);
+    let prioritizedLogSource;
+    while (prioritizedLogSource = priorityQueue.extractMin()) {
+        printer.print(prioritizedLogSource.logSource.last);
+        if (await prioritizedLogSource.logSource.popAsync()) {
+            insertLogSourceHeadReferenceIntoPriorityQueue(prioritizedLogSource.logSource, prioritizedLogSource.logSourcesIdx);
         }
     }
     resolve();
