@@ -12,30 +12,29 @@ const sortLogSourcesQueuesHeads = (logSources) => {
     });
 };
 
-const merge = (logSources, printer, popFunction) => {
+const logMerge = (logSources, printer) => {
     sortLogSourcesQueuesHeads(logSources);
     let indexedLogSource;
     while (indexedLogSource = priorityQueue.extractMin()) {
         printer.print(indexedLogSource.logSource.last);
         const currentLogSource = logSources[indexedLogSource.logSourcesIdx];
-        popFunction(currentLogSource, indexedLogSource);
-    }
-};
-
-const logMerge = (logSources, printer) => {
-    merge(logSources, printer, (ls, ils) => {
-        if (ls.pop()) {
-            insertLogSourceHeadReferenceIntoPriorityQueue(ls, ils.logSourcesIdx);
+        if (currentLogSource.pop()) {
+            insertLogSourceHeadReferenceIntoPriorityQueue(currentLogSource, indexedLogSource.logSourcesIdx);
         }
-    });
+    }
 }
 
-const asyncLogMerge = async (logSources, printer) => {
-    merge(logSources, printer, async (ls, ils) => {
-        if (await ls.popAsync()) {
-            insertLogSourceHeadReferenceIntoPriorityQueue(ls, ils.logSourcesIdx);
+const asyncLogMerge = async (logSources, printer, resolve) => {
+    sortLogSourcesQueuesHeads(logSources);
+    let indexedLogSource;
+    while (indexedLogSource = priorityQueue.extractMin()) {
+        printer.print(indexedLogSource.logSource.last);
+        const currentLogSource = logSources[indexedLogSource.logSourcesIdx];
+        if (await currentLogSource.popAsync()) {
+            insertLogSourceHeadReferenceIntoPriorityQueue(currentLogSource, indexedLogSource.logSourcesIdx);
         }
-    });
-};
+    }
+    resolve();
+}
 
 module.exports = { logMerge, asyncLogMerge };
